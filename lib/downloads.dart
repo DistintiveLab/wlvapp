@@ -193,7 +193,7 @@ class _DownloadsPageState extends State<DownloadsPage> {
         title: const Text('Meus downloads'),
         backgroundColor: const Color(0xFF2A1F1E),
       ),
-      body: _buildBody(),
+      body: SafeArea(top: false, child: _buildBody()),
     );
   }
 

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -40,6 +41,14 @@ bool _isNetworkError(WebResourceErrorType? type) {
 }
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      statusBarBrightness: Brightness.light,
+    ),
+  );
   runApp(const WlvdApp());
 }
 
@@ -276,61 +285,68 @@ class _PanelWebViewState extends State<PanelWebView> {
       child: Scaffold(
         floatingActionButton: _hasError
             ? null
-            : FloatingActionButton(
-                onPressed: _showMenu,
-                tooltip: 'Downloads e opções',
-                backgroundColor: const Color(0xFF2A1F1E),
-                child: const Icon(Icons.download),
+            : Padding(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).padding.bottom,
+                ),
+                child: FloatingActionButton(
+                  onPressed: _showMenu,
+                  tooltip: 'Downloads e opções',
+                  backgroundColor: const Color(0xFF2A1F1E),
+                  child: const Icon(Icons.download),
+                ),
               ),
         body: Stack(
           children: [
             Positioned.fill(
-              child: WebView(
-                initialUrl: kHomeUrl,
-                javascriptMode: JavascriptMode.unrestricted,
-                gestureNavigationEnabled: true,
-                javascriptChannels: <JavascriptChannel>{
-                  JavascriptChannel(
-                    name: 'WLVDNative',
-                    onMessageReceived: _handleBridgeMessage,
-                  ),
-                },
-                onWebViewCreated: (controller) {
-                  _controller = controller;
-                },
-                navigationDelegate: (request) {
-                  if (isWlvdUrl(request.url)) {
-                    return NavigationDecision.navigate;
-                  }
-                  _openExternal(request.url);
-                  return NavigationDecision.prevent;
-                },
-                onPageStarted: (_) {
-                  if (!_loading || _hasError) {
-                    setState(() {
-                      _loading = true;
-                      _hasError = false;
-                    });
-                  }
-                },
-                onPageFinished: (_) {
-                  final controller = _controller;
-                  if (controller != null) {
-                    unawaited(controller.runJavascript(kBridgeJs));
-                  }
-                  setState(() {
-                    _loading = false;
-                    _finishedOnce = true;
-                  });
-                },
-                onWebResourceError: (error) {
-                  if (!_finishedOnce && _isNetworkError(error.errorType)) {
+              child: SafeArea(
+                child: WebView(
+                  initialUrl: kHomeUrl,
+                  javascriptMode: JavascriptMode.unrestricted,
+                  gestureNavigationEnabled: true,
+                  javascriptChannels: <JavascriptChannel>{
+                    JavascriptChannel(
+                      name: 'WLVDNative',
+                      onMessageReceived: _handleBridgeMessage,
+                    ),
+                  },
+                  onWebViewCreated: (controller) {
+                    _controller = controller;
+                  },
+                  navigationDelegate: (request) {
+                    if (isWlvdUrl(request.url)) {
+                      return NavigationDecision.navigate;
+                    }
+                    _openExternal(request.url);
+                    return NavigationDecision.prevent;
+                  },
+                  onPageStarted: (_) {
+                    if (!_loading || _hasError) {
+                      setState(() {
+                        _loading = true;
+                        _hasError = false;
+                      });
+                    }
+                  },
+                  onPageFinished: (_) {
+                    final controller = _controller;
+                    if (controller != null) {
+                      unawaited(controller.runJavascript(kBridgeJs));
+                    }
                     setState(() {
                       _loading = false;
-                      _hasError = true;
+                      _finishedOnce = true;
                     });
-                  }
-                },
+                  },
+                  onWebResourceError: (error) {
+                    if (!_finishedOnce && _isNetworkError(error.errorType)) {
+                      setState(() {
+                        _loading = false;
+                        _hasError = true;
+                      });
+                    }
+                  },
+                ),
               ),
             ),
             if (_loading || _downloading)

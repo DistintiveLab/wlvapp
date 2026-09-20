@@ -11,7 +11,8 @@ negócio fica no painel web; o app adiciona recursos nativos de casca
 
 ## Tecnologia
 
-- Flutter (canal `master`, Flutter 3.1.0-pre, Dart 2.18)
+- Flutter 3.3.10 estável (Dart 2.18.6) — versão pinada para builds
+  reproduzíveis no F-Droid
 - `webview_flutter` para o WebView
 - `url_launcher` para abrir links externos no navegador do sistema
 - `path_provider` + `share_plus` + `open_file` para o gerenciador de downloads
@@ -68,4 +69,4 @@ painel continuam regidos pelos termos do projeto WLVD.
   lido pelo F-Droid).
 - Cada release precisa de tag git `v<versionName>` (ex.: `v1.0.0` para
   `versionCode 1`), com changelog em `fastlane/.../changelogs/<versionCode>.txt`.
-- Screenshots ainda pendentes (necessitam dispositivo/emulador).
+- Screenshots em `fastlane/metadata/android/{en-US,pt-BR}/images/phoneScreenshots/`.

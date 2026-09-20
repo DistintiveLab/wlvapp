@@ -37,8 +37,10 @@ flutter analyze
 
 ## Ambiente (gotchas importantes)
 
-- **Flutter antigo**: canal `master`, Flutter 3.1.0-pre (Dart 2.18, abril/2022).
-  `flutter` está em `/media/usb1/Development/gits/flutter/bin/flutter`.
+- **Flutter 3.3.10 estável** (Dart 2.18.6, dez/2022), pinado em
+  `/media/usb1/Development/gits/flutter-3.3.10/bin/flutter` para builds
+  reproduzíveis no F-Droid (o checkout antigo do canal `master` continua em
+  `/media/usb1/Development/gits/flutter`, mas não é mais usado).
   API antiga do `webview_flutter` (`WebView(initialUrl:..., javascriptMode:...)`,
   `WillPopScope`), não as APIs atuais (`WebViewController` novo, `PopScope`).
 - **Android SDK**: o SDK completo está em `/home/rodrigo/Android/Sdk`.
