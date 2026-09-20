@@ -1,0 +1,1 @@
+Novo ícone do app: emblema circular com bordas transparentes e suporte a adaptive icon, assumindo o mesmo formato arredondado dos demais apps no Android 8+.
