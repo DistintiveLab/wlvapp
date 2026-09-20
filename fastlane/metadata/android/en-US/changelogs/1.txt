@@ -1,0 +1,1 @@
+Initial release: native wrapper of the WLVD panel with offline error screen, external links in the browser, pull-to-refresh, page sharing and a local download manager for the panel data spreadsheets.

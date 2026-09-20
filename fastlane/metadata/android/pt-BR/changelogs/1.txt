@@ -1,0 +1,1 @@
+Versão inicial: wrapper nativo do painel WLVD com tela de erro offline, links externos no navegador, pull-to-refresh, compartilhamento de página e gerenciador local de downloads das planilhas do painel.

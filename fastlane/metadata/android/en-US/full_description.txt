@@ -1,0 +1,10 @@
+The World Labour Values Database (WLVD) provides estimates of labour values, prices of production and related indicators computed from national input-output tables.
+
+This app is a lightweight native wrapper around the official WLVD panel (worldlabourvalues.org):
+
+- Explore the map, country, indicators, trade and download tabs
+- Download data spreadsheets (XLSX/CSV) to a local folder with quick offline access
+- Pull-to-refresh, share the current page and open external links in the system browser
+- Remembers your language and last visited tab
+
+The panel behaviour lives on the web; the wrapper adds native conveniences on top of it. All source code is available under GPL-3.0.
