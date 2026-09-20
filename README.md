@@ -70,3 +70,6 @@ painel continuam regidos pelos termos do projeto WLVD.
 - Cada release precisa de tag git `v<versionName>` (ex.: `v1.0.0` para
   `versionCode 1`), com changelog em `fastlane/.../changelogs/<versionCode>.txt`.
 - Screenshots em `fastlane/metadata/android/{en-US,pt-BR}/images/phoneScreenshots/`.
+- A receita de build para o F-Droid (pinando o Flutter 3.3.10 via srclib) fica em
+  `fdroid/metadata/org.worldlabourvalues.wlv_panel.yml`; para submeter, copie-a
+  para `metadata/` num fork do fdroiddata e abra um MR.
