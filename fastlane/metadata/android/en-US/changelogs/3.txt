@@ -1,0 +1,1 @@
+Habilitada assinatura própria de release (reproducible builds no F-Droid).
