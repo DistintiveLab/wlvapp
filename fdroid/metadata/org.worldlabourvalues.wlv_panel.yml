@@ -16,7 +16,7 @@ Binaries: https://github.com/DistintiveLab/wlvapp/releases/download/v%v/app-rele
 Builds:
   - versionName: 1.0.2
     versionCode: 3
-    commit: 17a60e59a60e91a177292c4234727268f58cea57
+    commit: ee77776ac1a16331b665f357ea8ff6c80230834f
     sudo:
       - mkdir -p /media/usb1/Development
       - chown -R vagrant /media/usb1/Development
