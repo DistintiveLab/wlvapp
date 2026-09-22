@@ -58,6 +58,13 @@ android {
         versionName flutterVersionName
     }
 
+    dependenciesInfo {
+        // The encrypted dependency metadata block in the APK Signing Block
+        // is flagged by the F-Droid scanner and is only used by Google Play.
+        includeInApk = false
+        includeInBundle = false
+    }
+
     signingConfigs {
         release {
             if (keystorePropertiesFile.exists()) {
