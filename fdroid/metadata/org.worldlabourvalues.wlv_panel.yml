@@ -16,7 +16,7 @@ Binaries: https://github.com/DistintiveLab/wlvapp/releases/download/v%v/app-rele
 Builds:
   - versionName: 1.0.2
     versionCode: 3
-    commit: a00ae19af25caa09b7dea2aa3bbf6684c7c335b3
+    commit: 17a60e59a60e91a177292c4234727268f58cea57
     sudo:
       - mkdir -p /media/usb1/Development
       - chown -R vagrant /media/usb1/Development
@@ -26,10 +26,13 @@ Builds:
       - update-java-alternatives -s java-1.17.0-openjdk-amd64
     output: build/app/outputs/flutter-apk/app-release.apk
     srclibs:
-      - flutter@3.3.10
+      - flutter@stable
     rm:
       - ios
     prebuild:
+      - flutterVersion=$(sed -n -E "s/.*flutter-version:\ '(.*)'/\1/p" .github/workflows/release.yml)
+      - '[[ $flutterVersion ]]'
+      - git -C $$flutter$$ checkout -f $flutterVersion
       - export repo=/media/usb1/Development/wlvapp
       - cd ..
       - mv org.worldlabourvalues.wlv_panel $repo
