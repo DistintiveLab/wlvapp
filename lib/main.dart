@@ -371,7 +371,10 @@ class _PanelWebViewState extends State<PanelWebView> {
               ),
             if (_hasError)
               Positioned.fill(
-                child: _ErrorView(onRetry: _reload),
+                child: _ErrorView(
+                  onRetry: _reload,
+                  onOpenDownloads: _openDownloadsPage,
+                ),
               ),
           ],
         ),
@@ -422,9 +425,13 @@ class _DownloadBanner extends StatelessWidget {
 }
 
 class _ErrorView extends StatelessWidget {
-  const _ErrorView({required this.onRetry});
+  const _ErrorView({
+    required this.onRetry,
+    required this.onOpenDownloads,
+  });
 
   final VoidCallback onRetry;
+  final VoidCallback onOpenDownloads;
 
   @override
   Widget build(BuildContext context) {
@@ -454,6 +461,12 @@ class _ErrorView extends StatelessWidget {
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh),
                 label: const Text('Tentar novamente'),
+              ),
+              const SizedBox(height: 8),
+              TextButton.icon(
+                onPressed: onOpenDownloads,
+                icon: const Icon(Icons.download),
+                label: const Text('Meus downloads'),
               ),
             ],
           ),
