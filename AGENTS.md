@@ -21,11 +21,10 @@ gerenciador de downloads locais dos XLSX/CSV do painel).
 ## Comandos
 
 ```bash
-```bash
-export JAVA_HOME=/media/usb1/Development/android-studio/jre
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
 export ANDROID_HOME=/home/rodrigo/Android/Sdk
 export ANDROID_SDK_ROOT=/home/rodrigo/Android/Sdk
-export PATH="$JAVA_HOME/bin:$PATH"
+export PATH="/media/usb1/Development/gits/flutter-3.47.5/bin:$PATH"
 
 flutter pub get
 flutter run                          # executa no dispositivo/emulador
@@ -37,12 +36,12 @@ flutter analyze
 
 ## Ambiente (gotchas importantes)
 
-- **Flutter 3.3.10 estável** (Dart 2.18.6, dez/2022), pinado em
-  `/media/usb1/Development/gits/flutter-3.3.10/bin/flutter` para builds
-  reproduzíveis no F-Droid (o checkout antigo do canal `master` continua em
-  `/media/usb1/Development/gits/flutter`, mas não é mais usado).
-  API antiga do `webview_flutter` (`WebView(initialUrl:..., javascriptMode:...)`,
-  `WillPopScope`), não as APIs atuais (`WebViewController` novo, `PopScope`).
+- **Flutter 3.47.5 estável** (set/2026), clonado em
+  `/media/usb1/Development/gits/flutter-3.47.5` (padrão srclib do F-Droid:
+  `git clone --depth 1 --branch 3.47.5`). O checkout antigo do 3.3.10 continua
+  em `/media/usb1/Development/gits/flutter-3.3.10`, usado só para a linha
+  1.0.2/3. Desde a 1.0.3 o app usa a API atual do `webview_flutter`
+  (`WebViewController` + `WebViewWidget`, `PopScope`, `SharePlus.instance`).
 - **Android SDK**: o SDK completo está em `/home/rodrigo/Android/Sdk`.
   A variável global `ANDROID_SDK_ROOT` aponta para um caminho inexistente
   (`/media/usb1/Development/android-sdk-linux/`); `ANDROID_HOME` está vazia.
@@ -51,25 +50,18 @@ flutter analyze
   ```bash
   ANDROID_HOME=/home/rodrigo/Android/Sdk ANDROID_SDK_ROOT=/home/rodrigo/Android/Sdk flutter build apk --release
   ```
-- **Plataformas instaladas**: `android-32`, `android-33`, `android-35`, `android-36`
-  e `android-36-2`. Não há `android-31` (padrão do Flutter 3.1). Por isso
-  `android/app/build.gradle` fixa `compileSdkVersion 33`, `targetSdkVersion 33`
-  e `minSdkVersion 21` (em vez de `flutter.compileSdkVersion`, que é 31).
-  `compileSdkVersion 33` é exigido pelo `url_launcher_android`. Evite
-  `android-35`: o `android.jar` dele estava corrompido para este toolchain
-  (AAPT2 falha com "RES_TABLE_TYPE_TYPE entry offsets overlap").
-- **NDK não está instalado** e o projeto não usa código nativo; a linha
-  `ndkVersion flutter.ndkVersion` foi removida de `build.gradle` de propósito.
-  Não a readicione sem instalar o NDK.
-- O build usa Gradle 7.4 e AGP 7.1.2 (definidos no scaffold do Flutter 3.1);
-  não atualize sem verificar compatibilidade com o Flutter antigo.
-- **Java**: use Java 11 (o JRE empacotado do Android Studio em
-  `/media/usb1/Development/android-studio/jre`). O Java do sistema é 21, novo
-  demais para o Gradle 7.4; o Java 17 do sistema é só JRE (sem `javac`).
-  Prefixe o build com `JAVA_HOME=/media/usb1/Development/android-studio/jre`.
-- **Kotlin**: `ext.kotlin_version = '1.7.20'` em `android/build.gradle`. Versões
-  mais antigas (ex.: 1.6.10) falham ao ler metadados Kotlin 1.7+ das
-  dependências.
+- **Plataformas instaladas**: `android-32`, `android-33`, `android-35`,
+  `android-36` e `android-36-2`. O app usa os defaults do Flutter
+  (`compileSdk`/`targetSdk` 36, `minSdk` 24 — mínimo do Flutter 3.47; a
+  1.0.2 ainda suportava minSdk 21 com compile/target 33).
+- **NDK não está instalado** e o projeto não usa código nativo; não readdicione
+  `ndkVersion` em `android/app/build.gradle.kts` sem instalar o NDK.
+- O build usa **Gradle 9.3.1, AGP 9.1.0 e Kotlin 2.4.0** (scaffold do
+  Flutter 3.47, arquivos `.kts`). Não mexa em `android.newDsl`/
+  `android.builtInKotlin` no `gradle.properties` sem testar o build.
+- **Java**: use o JDK 21 do sistema (`/usr/lib/jvm/java-21-openjdk-amd64`,
+  com `javac`); Gradle 9 exige JDK 17+. O Java 11 do Android Studio não serve
+  mais para builds, só para `keytool`.
 - **Debug keystore**: o `~/.android/debug.keystore` foi regerado com o keytool do
   Java 11 (alias `AndroidDebugKey`, senha `android`). O keystore antigo usava MAC
   `HmacPBESHA256`, que o Java 11 não consegue ler ("Integrity check failed").
@@ -90,24 +82,27 @@ flutter analyze
     (domínio ou subdomínio de `worldlabourvalues.org`). É testada em
     `test/widget_test.dart`.
   - `WlvdApp` — `MaterialApp`.
-  - `PanelWebView` (StatefulWidget) — `WebView` com:
-    - `javascriptMode: JavascriptMode.unrestricted` (necessário ao Shiny).
-    - `gestureNavigationEnabled: true`.
-    - `navigationDelegate`: URLs do domínio navegam internamente; URLs externas
-      abrem via `url_launcher`.
-    - `WillPopScope`: botão voltar navega no histórico do WebView antes de
+  - `PanelWebView` (StatefulWidget) — `WebViewWidget` com `WebViewController`
+    criado no `initState`:
+    - `setJavaScriptMode(JavaScriptMode.unrestricted)` (necessário ao Shiny).
+    - `addJavaScriptChannel('WLVDNative', ...)` recebe os chunks base64.
+    - `NavigationDelegate`: URLs do domínio navegam internamente; URLs externas
+      abrem via `url_launcher`; `onPageFinished` injeta `kBridgeJs`.
+    - `PopScope`: botão voltar navega no histórico do WebView antes de
       fechar o app.
     - Indicador de progresso no topo enquanto carrega.
-    - Tela de erro com "Tentar novamente" quando uma falha de rede acontece
-      antes da primeira página terminar de carregar (`_isNetworkError`).
-  - `_ErrorView` — tela de erro/retry.
+    - Tela de erro com "Tentar novamente" e "Meus downloads" quando uma falha
+      de rede acontece antes da primeira página terminar de carregar
+      (`_isNetworkError`).
+  - `_ErrorView` — tela de erro/retry + acesso a downloads salvos offline.
 
 ## Dependências (pinned pelo resolver)
 
-- `webview_flutter: ^3.0.4` (resolvido para 3.0.4, plugin Android 2.10.4).
-  DOM storage já é habilitado por padrão pelo plugin Android, então
+- `webview_flutter: ^4.13.0` (resolvido para 4.14.1).
+  DOM storage é habilitado por padrão pelo plugin Android, então
   `localStorage`/cookies do painel (idioma, aba) persistem.
-- `url_launcher: ^6.1.6` (resolvido para 6.1.10).
+- `url_launcher: ^6.1.6` (resolvido para 6.3.2), `share_plus` 13.3
+  (`SharePlus.instance.share`), `open_file` 4.0, `path_provider` 2.1.6.
 
 ## Ícones
 
