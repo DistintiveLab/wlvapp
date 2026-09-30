@@ -1,3 +1,7 @@
+AntiFeatures:
+  TetheredNet:
+    en-US: The app depends on the WLVD service at worldlabourvalues.org and does not
+      provide a setting to use an alternative server instance.
 Categories:
   - Science & Education
 License: GPL-3.0-only
