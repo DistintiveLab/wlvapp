@@ -1,0 +1,1 @@
+Tela de downloads acessível mesmo offline (botão na tela de erro); atualização para a API atual do webview_flutter e toolchain Android moderna.

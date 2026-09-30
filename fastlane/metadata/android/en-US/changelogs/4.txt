@@ -1,0 +1,1 @@
+Downloads screen stays reachable from the offline error view; updated to the current webview_flutter API and modern Android build toolchain.
