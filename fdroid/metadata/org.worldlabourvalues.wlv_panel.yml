@@ -18,9 +18,9 @@ Repo: https://github.com/DistintiveLab/wlvapp.git
 Binaries: https://github.com/DistintiveLab/wlvapp/releases/download/v%v/app-release.apk
 
 Builds:
-  - versionName: 1.0.2
-    versionCode: 3
-    commit: ee77776ac1a16331b665f357ea8ff6c80230834f
+  - versionName: 1.0.3
+    versionCode: 4
+    commit: 5c2fd4c095dcf60d39ba7bc5c2e723e60e635483
     sudo:
       - mkdir -p /media/usb1/Development
       - chown -R vagrant /media/usb1/Development
@@ -63,5 +63,5 @@ AllowedAPKSigningKeys: 8113742912dae26687174bd47bc898a5f03dfeb900063737b82e3ce43
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 UpdateCheckData: pubspec.yaml|version:\s.+\+(\d+)|.|version:\s(.+)\+
-CurrentVersion: 1.0.2
-CurrentVersionCode: 3
+CurrentVersion: 1.0.3
+CurrentVersionCode: 4
