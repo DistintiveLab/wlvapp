@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:cross_file/cross_file.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
@@ -94,7 +93,7 @@ IconData iconForFile(String path) {
 
 /// Página com a lista de planilhas/dados baixados do painel.
 class DownloadsPage extends StatefulWidget {
-  const DownloadsPage({Key? key}) : super(key: key);
+  const DownloadsPage({super.key});
 
   @override
   State<DownloadsPage> createState() => _DownloadsPageState();
@@ -140,8 +139,8 @@ class _DownloadsPageState extends State<DownloadsPage> {
   }
 
   Future<void> _share(File file) async {
-    await Share.shareXFiles(
-      [XFile(file.path, mimeType: _mimeTypeFor(file.path))],
+    await SharePlus.instance.share(
+      ShareParams(files: [XFile(file.path, mimeType: _mimeTypeFor(file.path))]),
     );
   }
 
@@ -251,7 +250,7 @@ class _DownloadsPageState extends State<DownloadsPage> {
       child: ListView.separated(
         physics: const AlwaysScrollableScrollPhysics(),
         itemCount: files.length,
-        separatorBuilder: (_, __) => const Divider(height: 1),
+        separatorBuilder: (_, _) => const Divider(height: 1),
         itemBuilder: (context, index) {
           final file = files[index];
           final stat = file.statSync();

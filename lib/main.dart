@@ -53,7 +53,7 @@ void main() {
 }
 
 class WlvdApp extends StatelessWidget {
-  const WlvdApp({Key? key}) : super(key: key);
+  const WlvdApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -70,14 +70,14 @@ class WlvdApp extends StatelessWidget {
 }
 
 class PanelWebView extends StatefulWidget {
-  const PanelWebView({Key? key}) : super(key: key);
+  const PanelWebView({super.key});
 
   @override
   State<PanelWebView> createState() => _PanelWebViewState();
 }
 
 class _PanelWebViewState extends State<PanelWebView> {
-  WebViewController? _controller;
+  late final WebViewController _webController;
   bool _loading = true;
   bool _hasError = false;
   bool _finishedOnce = false;
@@ -88,12 +88,58 @@ class _PanelWebViewState extends State<PanelWebView> {
   double? _downloadProgress;
   final StringBuffer _chunkBuffer = StringBuffer();
 
+  @override
+  void initState() {
+    super.initState();
+    _webController = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..addJavaScriptChannel(
+        'WLVDNative',
+        onMessageReceived: _handleBridgeMessage,
+      )
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onNavigationRequest: (request) {
+            if (isWlvdUrl(request.url)) {
+              return NavigationDecision.navigate;
+            }
+            _openExternal(request.url);
+            return NavigationDecision.prevent;
+          },
+          onPageStarted: (_) {
+            if (!_loading || _hasError) {
+              setState(() {
+                _loading = true;
+                _hasError = false;
+              });
+            }
+          },
+          onPageFinished: (_) {
+            unawaited(_webController.runJavaScript(kBridgeJs));
+            setState(() {
+              _loading = false;
+              _finishedOnce = true;
+            });
+          },
+          onWebResourceError: (error) {
+            if (!_finishedOnce && _isNetworkError(error.errorType)) {
+              setState(() {
+                _loading = false;
+                _hasError = true;
+              });
+            }
+          },
+        ),
+      )
+      ..loadRequest(Uri.parse(kHomeUrl));
+  }
+
   Future<void> _reload() async {
     setState(() {
       _loading = true;
       _hasError = false;
     });
-    await _controller?.reload();
+    await _webController.reload();
   }
 
   Future<void> _openExternal(String url) async {
@@ -106,8 +152,7 @@ class _PanelWebViewState extends State<PanelWebView> {
   }
 
   Future<String> _currentUrl() async {
-    final url = await _controller?.currentUrl();
-    return url ?? kHomeUrl;
+    return await _webController.currentUrl() ?? kHomeUrl;
   }
 
   void _toast(String message, {VoidCallback? onOpenDownloads}) {
@@ -128,9 +173,8 @@ class _PanelWebViewState extends State<PanelWebView> {
 
   Future<void> _sharePage() async {
     final url = await _currentUrl();
-    await Share.share(
-      url,
-      subject: 'WLVD — World Labour Values Database',
+    await SharePlus.instance.share(
+      ShareParams(text: url, subject: 'WLVD — World Labour Values Database'),
     );
   }
 
@@ -186,7 +230,7 @@ class _PanelWebViewState extends State<PanelWebView> {
     );
   }
 
-  void _handleBridgeMessage(JavascriptMessage message) {
+  void _handleBridgeMessage(JavaScriptMessage message) {
     Map<String, dynamic> data;
     try {
       data = jsonDecode(message.message) as Map<String, dynamic>;
@@ -273,14 +317,15 @@ class _PanelWebViewState extends State<PanelWebView> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        final controller = _controller;
-        if (controller != null && await controller.canGoBack()) {
-          await controller.goBack();
-          return false;
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        if (await _webController.canGoBack()) {
+          await _webController.goBack();
+        } else {
+          await SystemNavigator.pop();
         }
-        return true;
       },
       child: Scaffold(
         floatingActionButton: _hasError
@@ -300,53 +345,7 @@ class _PanelWebViewState extends State<PanelWebView> {
           children: [
             Positioned.fill(
               child: SafeArea(
-                child: WebView(
-                  initialUrl: kHomeUrl,
-                  javascriptMode: JavascriptMode.unrestricted,
-                  gestureNavigationEnabled: true,
-                  javascriptChannels: <JavascriptChannel>{
-                    JavascriptChannel(
-                      name: 'WLVDNative',
-                      onMessageReceived: _handleBridgeMessage,
-                    ),
-                  },
-                  onWebViewCreated: (controller) {
-                    _controller = controller;
-                  },
-                  navigationDelegate: (request) {
-                    if (isWlvdUrl(request.url)) {
-                      return NavigationDecision.navigate;
-                    }
-                    _openExternal(request.url);
-                    return NavigationDecision.prevent;
-                  },
-                  onPageStarted: (_) {
-                    if (!_loading || _hasError) {
-                      setState(() {
-                        _loading = true;
-                        _hasError = false;
-                      });
-                    }
-                  },
-                  onPageFinished: (_) {
-                    final controller = _controller;
-                    if (controller != null) {
-                      unawaited(controller.runJavascript(kBridgeJs));
-                    }
-                    setState(() {
-                      _loading = false;
-                      _finishedOnce = true;
-                    });
-                  },
-                  onWebResourceError: (error) {
-                    if (!_finishedOnce && _isNetworkError(error.errorType)) {
-                      setState(() {
-                        _loading = false;
-                        _hasError = true;
-                      });
-                    }
-                  },
-                ),
+                child: WebViewWidget(controller: _webController),
               ),
             ),
             if (_loading || _downloading)
