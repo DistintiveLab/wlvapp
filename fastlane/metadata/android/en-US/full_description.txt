@@ -8,3 +8,5 @@ This app is a lightweight native wrapper around the official WLVD panel (worldla
 - Remembers your language and last visited tab
 
 The panel behaviour lives on the web; the wrapper adds native conveniences on top of it. All source code is available under GPL-3.0.
+
+Note: the native shell (menus, downloads screen and error messages) is currently available in Portuguese only, while the web panel itself is available in English.
