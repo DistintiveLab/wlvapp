@@ -1,0 +1,1 @@
+Smaller per-architecture APKs via ABI split; each device now downloads only the code it needs.
